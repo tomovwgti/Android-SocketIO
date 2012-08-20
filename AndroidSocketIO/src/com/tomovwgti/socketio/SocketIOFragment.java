@@ -1,13 +1,18 @@
 
 package com.tomovwgti.socketio;
 
+import io.socket.SocketIO;
 import io.socket.util.SocketIOManager;
 import net.arnx.jsonic.JSON;
+import net.arnx.jsonic.JSONException;
+
+import org.json.JSONObject;
+
 import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +25,7 @@ public class SocketIOFragment extends Fragment {
 
     private MessageCallback mCallback;
     private SocketIOManager mSocketManager;
+    private SocketIO mSocket;
 
     public static interface MessageCallbackPicker {
         public MessageCallback getInstance();
@@ -106,8 +112,37 @@ public class SocketIOFragment extends Fragment {
 
         MessageCallbackPicker picker = (MessageCallbackPicker) activity;
         mCallback = picker.getInstance();
-        SocketIOActivity act = (SocketIOActivity) getActivity();
-        act.setSocketIOManager(mSocketManager);
+    }
+
+    /**
+     * Socket.IOでの接続
+     * 
+     * @param ipAddress
+     */
+    public void connectSocketIO(String ipAddress) {
+        mSocket = mSocketManager.connect("http://" + ipAddress + ":3000/");
+    }
+
+    /**
+     * Socket.IOの切断
+     */
+    public void disconnectSocketIO() {
+        mSocketManager.disconnect();
+    }
+
+    /**
+     * Socket.IOを使って送信
+     */
+    public void emit(Msg message) {
+        try {
+            mSocket.emit("message", new JSONObject(JSON.encode(message)));
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (org.json.JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**

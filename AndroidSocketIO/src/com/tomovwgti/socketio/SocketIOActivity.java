@@ -1,24 +1,19 @@
 
 package com.tomovwgti.socketio;
 
-import io.socket.SocketIO;
-import io.socket.util.SocketIOManager;
-import net.arnx.jsonic.JSON;
-import net.arnx.jsonic.JSONException;
-
-import org.json.JSONObject;
-
 import android.app.AlertDialog;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -33,8 +28,6 @@ public class SocketIOActivity extends FragmentActivity implements MessageCallbac
     static final String TAG = SocketIOActivity.class.getSimpleName();
 
     private static final String PREF_KEY = "IPADDRESS";
-    private SocketIOManager mSocketManager;
-    private SocketIO mSocket;
     private AlertDialog mAlertDialog;
     private SharedPreferences mPref;
     private SharedPreferences.Editor mEditor;
@@ -44,6 +37,8 @@ public class SocketIOActivity extends FragmentActivity implements MessageCallbac
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 起動時にキーボードが開かないように
+        this.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.main);
 
         mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
@@ -52,7 +47,7 @@ public class SocketIOActivity extends FragmentActivity implements MessageCallbac
         mListView.setAdapter(mAdapter);
 
         { // SocketIOFragmentの作成と登録
-            FragmentManager manager = getFragmentManager();
+            FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
             transaction.add(new SocketIOFragment(), "socketio");
             transaction.commit();
@@ -67,15 +62,7 @@ public class SocketIOActivity extends FragmentActivity implements MessageCallbac
                 EditText edit = (EditText) findViewById(R.id.input_message);
                 Msg sendMessage = new Msg();
                 sendMessage.setValue(edit.getText().toString());
-                try {
-                    mSocket.emit("message", new JSONObject(JSON.encode(sendMessage)));
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (org.json.JSONException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                ((SocketIOFragment) getFragment()).emit(sendMessage);
                 edit.setText("");
             }
         });
@@ -89,14 +76,14 @@ public class SocketIOActivity extends FragmentActivity implements MessageCallbac
             mAlertDialog = showAlertDialog();
             mAlertDialog.show();
         } else {
-            mSocket = mSocketManager.connect("http://" + mPref.getString(PREF_KEY, "") + ":3000/");
+            ((SocketIOFragment) getFragment()).connectSocketIO(mPref.getString(PREF_KEY, ""));
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mSocketManager.disconnect();
+        ((SocketIOFragment) getFragment()).disconnectSocketIO();
     }
 
     @Override
@@ -104,8 +91,8 @@ public class SocketIOActivity extends FragmentActivity implements MessageCallbac
         return this;
     }
 
-    public void setSocketIOManager(SocketIOManager manager) {
-        this.mSocketManager = manager;
+    private Fragment getFragment() {
+        return getSupportFragmentManager().findFragmentByTag("socketio");
     }
 
     public AlertDialog showAlertDialog() {
@@ -132,7 +119,9 @@ public class SocketIOActivity extends FragmentActivity implements MessageCallbac
                         if (edit != null && edit.length() != 0) {
                             // ここで[OK]が押されたときと同じ処理をさせます
                             String editStr = edit.getText().toString();
-                            mSocket = mSocketManager.connect("http://" + editStr + ":3000/");
+                            Fragment fragment = getSupportFragmentManager().findFragmentByTag(
+                                    "socketio");
+                            ((SocketIOFragment) fragment).connectSocketIO(editStr);
                             mAlertDialog.dismiss();
                         }
                         return true;
@@ -150,7 +139,9 @@ public class SocketIOActivity extends FragmentActivity implements MessageCallbac
                         // OKボタン押下時のハンドリング
                         mEditor.putString(PREF_KEY, editStr);
                         mEditor.commit();
-                        mSocket = mSocketManager.connect("http://" + editStr + ":3000/");
+                        Fragment fragment = getSupportFragmentManager().findFragmentByTag(
+                                "socketio");
+                        ((SocketIOFragment) fragment).connectSocketIO(editStr);
                     }
                 }).create();
     }
@@ -193,8 +184,7 @@ public class SocketIOActivity extends FragmentActivity implements MessageCallbac
 
     @Override
     public void onError() {
-        // TODO Auto-generated method stub
-
+        Toast.makeText(SocketIOActivity.this, "Socket.IO Error!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
