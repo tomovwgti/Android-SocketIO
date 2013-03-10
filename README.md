@@ -9,6 +9,7 @@ Androidクライアント向けSocket.IOの動作サンプル
 * AndroidSocketIO : Androidクライアント
 * NodeServer : 動作確認のためのサーバサイド(Node.js)
 * ポートは3000をlistenするので、"http://localhost:3000"という形でアクセスします
+* サンプルのAndroidクライアントでは、接続するポート番号まで含めて入力してください
 
 詳細は各ディレクトリのREADME.mdを参照のこと
 
