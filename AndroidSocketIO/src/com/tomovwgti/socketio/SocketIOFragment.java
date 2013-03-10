@@ -120,7 +120,7 @@ public class SocketIOFragment extends Fragment {
      * @param ipAddress
      */
     public void connectSocketIO(String ipAddress) {
-        mSocket = mSocketManager.connect("http://" + ipAddress + ":3000/");
+        mSocket = mSocketManager.connect("http://" + ipAddress);
     }
 
     /**

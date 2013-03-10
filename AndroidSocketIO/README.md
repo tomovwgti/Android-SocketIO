@@ -7,7 +7,8 @@ Socket.IOをAndroidクライアントで動作するようにしたサンプル�
 -------
 
 * サーバサイドはこの[５分くらいで出来るnode.js(0.6) + socket.io(0.8x)のサンプルプログラム](http://d.hatena.ne.jp/replication/20111108/1320762287)を参考にしたもので確認しています。
-* 動作確認はNode.js(v0.6.6/v0.8.7)Socket.IO(v.0.9.0)
+* 動作確認はNode.js(v0.6.6/v0.8.7), Socket.IO(.0.9.0)
+* 動作確認はNode.js(v0.8.16), Socket.IO(v0.9.10)
 
 構成
 ------------
