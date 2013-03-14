@@ -1,6 +1,8 @@
 Android-SocketIO
 =============
 
+このコードは古いので[こちら](https://github.com/tomovwgti/Android-SocketIO)へ
+
 Androidクライアント向けSocket.IOの動作サンプル
 
 概要
