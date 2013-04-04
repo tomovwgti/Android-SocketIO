@@ -36,8 +36,6 @@ app.configure('development', function(){
 
 app.get('/', routes.index);
 
-// ソケットを作る
-var socketIO = require('socket.io');
 // クライアントの接続を待つ(IPアドレスとポート番号を結びつけます)
 server.listen(3000);
 
